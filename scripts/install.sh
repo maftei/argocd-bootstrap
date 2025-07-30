@@ -27,9 +27,11 @@ kubectl get ns argocd >/dev/null 2>&1 || kubectl create ns argocd
 echo "🚀 Installing ArgoCD core components..."
 kubectl apply -n argocd -f manifests/install-argocd.yaml
 
-echo "⏳ Waiting for argocd-server to be created..."
-kubectl wait --for=condition=available --timeout=90s deployment/argocd-server -n argocd || true
-sleep 10
+echo "⏳ Waiting for argocd-server service to be created..."
+until kubectl get svc argocd-server -n argocd >/dev/null 2>&1; do
+  echo "Waiting for argocd-server service..."
+  sleep 5
+done
 
 echo "🔧 Patching argocd-server service to ClusterIP..."
 kubectl patch svc argocd-server -n argocd --patch-file manifests/patch-argocd-service.yaml
