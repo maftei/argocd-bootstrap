@@ -1,0 +1,29 @@
+name: Deploy ArgoCD to EKS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-argocd:
+    name: Deploy ArgoCD Manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name eks1-dev-maftei
+
+      - name: Deploy ArgoCD manifests
+        run: |
+          chmod +x scripts/install.sh
+          ./scripts/install.sh

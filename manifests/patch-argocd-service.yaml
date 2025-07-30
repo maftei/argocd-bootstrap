@@ -1,0 +1,4 @@
+# Patch argocd-server to ClusterIP (placeholder)
+# manifests/patch-argocd-service.yaml
+spec:
+  type: ClusterIP

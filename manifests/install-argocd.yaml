@@ -1,0 +1,14 @@
+# Official ArgoCD install (placeholder)
+# manifests/install-argocd.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+# This pulls the official ArgoCD install manifest
+# Ref: https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+# You can also include this with kustomize in the future
+# For now, just use the latest stable
+---
+# You can curl it directly inside the script too, but if you want to pin:
+# kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
