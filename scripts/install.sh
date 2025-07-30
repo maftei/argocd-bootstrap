@@ -15,6 +15,11 @@ kubectl apply -f manifests/cert-manager/cert-issuer.yaml
 
 # Step 4: Install ArgoCD core
 kubectl apply -n argocd -f manifests/install-argocd.yaml
+# ✅ NEW: Wait for the argocd-server service to appear
+echo "⏳ Waiting for argocd-server service to be created..."
+kubectl wait --for=condition=available --timeout=90s deployment/argocd-server -n argocd || true
+sleep 10
+
 
 # Step 5: Patch argocd-server
 kubectl patch svc argocd-server -n argocd --patch-file manifests/patch-argocd-service.yaml
