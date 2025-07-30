@@ -25,7 +25,7 @@ echo "🔧 Creating namespace for ArgoCD..."
 kubectl get ns argocd >/dev/null 2>&1 || kubectl create ns argocd
 
 echo "🚀 Installing ArgoCD core components..."
-kubectl apply -n argocd -f manifests/install-argocd.yaml
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 echo "⏳ Waiting for argocd-server service to be created..."
 until kubectl get svc argocd-server -n argocd >/dev/null 2>&1; do
