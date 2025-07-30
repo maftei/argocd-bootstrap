@@ -2,29 +2,39 @@
 
 set -e
 
-echo "🚀 Starting ArgoCD Bootstrap..."
+echo "🔧 Creating namespace for cert-manager..."
+kubectl get ns cert-manager >/dev/null 2>&1 || kubectl create ns cert-manager
 
-# Step 1: Create namespace
-kubectl create ns argocd || true
+echo "🔧 Adding Helm repo..."
+helm repo add jetstack https://charts.jetstack.io || true
+helm repo update
 
-# Step 2: Install cert-manager
-bash manifests/cert-manager/cert-manager-helm-install.sh
+echo "🚀 Installing cert-manager via Helm..."
+helm upgrade --install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set installCRDs=true \
+  --version v1.18.2
 
-# Step 3: Apply ClusterIssuer
-kubectl apply -f manifests/cert-manager/cert-issuer.yaml
+echo "✅ cert-manager installed successfully."
 
-# Step 4: Install ArgoCD core
+echo "🔧 Applying ClusterIssuer..."
+kubectl apply -f manifests/ingress/cert-issuer.yaml
+
+echo "🔧 Creating namespace for ArgoCD..."
+kubectl get ns argocd >/dev/null 2>&1 || kubectl create ns argocd
+
+echo "🚀 Installing ArgoCD core components..."
 kubectl apply -n argocd -f manifests/install-argocd.yaml
-# ✅ NEW: Wait for the argocd-server service to appear
-echo "⏳ Waiting for argocd-server service to be created..."
+
+echo "⏳ Waiting for argocd-server to be created..."
 kubectl wait --for=condition=available --timeout=90s deployment/argocd-server -n argocd || true
 sleep 10
 
-
-# Step 5: Patch argocd-server
+echo "🔧 Patching argocd-server service to ClusterIP..."
 kubectl patch svc argocd-server -n argocd --patch-file manifests/patch-argocd-service.yaml
 
-# Step 6: Apply ArgoCD Ingress
+echo "🌐 Applying Ingress for ArgoCD..."
 kubectl apply -f manifests/ingress/argocd-ingress.yaml
 
-echo "✅ All components installed. Access ArgoCD at: https://argocd-app.opt.dev.mafteiops.com"
+echo "✅ ArgoCD is now bootstrapped at https://argocd-app.opt.dev.mafteiops.com"
